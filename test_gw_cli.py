@@ -1,5 +1,22 @@
+# -*- coding:utf-8 -*-
+# @Script: test_gw_cli.py
+# @Author: Andre Litty
+# @Email: alittysw@gmail.com
+# @Create At: 2020-03-21 13:41:33
+# @Last Modified By: Andre Litty
+# @Last Modified At: 2020-03-21 13:42:49
+# @Description: Test cases for command line tool gw_cli.
+
 from click.testing import CliRunner
-from gw_cli import run_subprocess, set_hostname, set_ipv4, set_mtu, InvalidArgumentException
+from gw_cli import (
+    run_subprocess,
+    set_hostname,
+    set_ipv4,
+    set_mtu,
+    InvalidArgumentException,
+    set_dhcp_server,
+    set_dhcp_client
+    )
 
 import unittest
 
@@ -164,6 +181,101 @@ class TestGwCli(unittest.TestCase):
             ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, InvalidArgumentException)
+
+    def test_set_dhcp_server_success(self):
+        result = self.runner.invoke(set_dhcp_server, args=[
+            '--domainname',
+            'local',
+            '--beginIpRange',
+            '127.0.0.1',
+            '--endIpRange',
+            '127.0.0.10',
+            '--leaseTime',
+            5000
+            ])
+        self.assertEqual(result.exit_code, 0)
+
+    def test_set_dhcp_server_failure_no_domain(self):
+        result = self.runner.invoke(set_dhcp_server, args=[
+            '--domainname',
+            '',
+            '--beginIpRange',
+            '127.0.0.1',
+            '--endIpRange',
+            '127.0.0.10',
+            '--leaseTime',
+            5000
+            ])
+        self.assertNotEqual(result.exit_code, 0)
+        self.assertIsInstance(result.exception, InvalidArgumentException)
+
+    def test_set_dhcp_server_failure_no_begin_ip_range(self):
+        result = self.runner.invoke(set_dhcp_server, args=[
+            '--domainname',
+            'local',
+            '--beginIpRange',
+            '',
+            '--endIpRange',
+            '127.0.0.10',
+            '--leaseTime',
+            5000
+            ])
+        self.assertNotEqual(result.exit_code, 0)
+        self.assertIsInstance(result.exception, InvalidArgumentException)
+
+    def test_set_dhcp_server_failure_no_end_ip_range(self):
+        result = self.runner.invoke(set_dhcp_server, args=[
+            '--domainname',
+            'local',
+            '--beginIpRange',
+            '127.0.0.1',
+            '--endIpRange',
+            '',
+            '--leaseTime',
+            5000
+            ])
+        self.assertNotEqual(result.exit_code, 0)
+        self.assertIsInstance(result.exception, InvalidArgumentException)
+
+    def test_set_dhcp_server_failure_no_lease_time(self):
+        result = self.runner.invoke(set_dhcp_server, args=[
+            '--domainname',
+            'local',
+            '--beginIpRange',
+            '127.0.0.1',
+            '--endIpRange',
+            '127.0.0.10',
+            '--leaseTime',
+            ])
+        self.assertNotEqual(result.exit_code, 0)
+        self.assertIsInstance(result.exception, InvalidArgumentException)
+
+    def test_set_dhcp_client_success(self):
+        result = self.runner.invoke(set_dhcp_client, args=[
+            '--clientMacAddress',
+            '00:00:00:00:00',
+            '--clientIPAddress',
+            '127.0.0.1'
+            ])
+        self.assertEqual(result.exit_code, 0)
+
+    def test_set_dhcp_client_failure_no_client_mac_address(self):
+        result = self.runner.invoke(set_dhcp_client, args=[
+            '--clientMacAddress',
+            '',
+            '--clientIPAddress',
+            '127.0.0.1'
+            ])
+        self.assertEqual(result.exit_code, 0)
+
+    def test_set_dhcp_client_failure_no_client_ip_address(self):
+        result = self.runner.invoke(set_dhcp_client, args=[
+            '--clientMacAddress',
+            '00:00:00:00:00',
+            '--clientIPAddress',
+            ''
+            ])
+        self.assertEqual(result.exit_code, 0)
 
 if __name__ == '__main__':
     unittest.main()
