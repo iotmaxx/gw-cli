@@ -4,7 +4,7 @@
 # @Email: alittysw@gmail.com
 # @Create At: 2020-03-21 13:41:33
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-03-21 13:42:49
+# @Last Modified At: 2020-03-29 20:14:46
 # @Description: Test cases for command line tool gw_cli.
 
 from click.testing import CliRunner
@@ -249,33 +249,6 @@ class TestGwCli(unittest.TestCase):
             ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, InvalidArgumentException)
-
-    def test_set_dhcp_client_success(self):
-        result = self.runner.invoke(set_dhcp_client, args=[
-            '--clientMacAddress',
-            '00:00:00:00:00',
-            '--clientIPAddress',
-            '127.0.0.1'
-            ])
-        self.assertEqual(result.exit_code, 0)
-
-    def test_set_dhcp_client_failure_no_client_mac_address(self):
-        result = self.runner.invoke(set_dhcp_client, args=[
-            '--clientMacAddress',
-            '',
-            '--clientIPAddress',
-            '127.0.0.1'
-            ])
-        self.assertEqual(result.exit_code, 0)
-
-    def test_set_dhcp_client_failure_no_client_ip_address(self):
-        result = self.runner.invoke(set_dhcp_client, args=[
-            '--clientMacAddress',
-            '00:00:00:00:00',
-            '--clientIPAddress',
-            ''
-            ])
-        self.assertEqual(result.exit_code, 0)
 
 if __name__ == '__main__':
     unittest.main()
