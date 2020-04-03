@@ -1,12 +1,13 @@
 # -*- coding:utf-8 -*-
-# @Script: commands.py
+# @Script: gw_cli.py
 # @Author: Andre Litty
 # @Email: alittysw@gmail.com
-# @Create At: 2020-04-03 11:15:51
+# @Create At: 2020-03-21 13:42:22
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-04-03 11:30:16
-# @Description: Commands.
+# @Last Modified At: 2020-04-03 12:40:15
+# @Description: Command Line Tool to configure local network and dhcp settings on linux based machines.
 
+import click
 import subprocess
 
 
@@ -57,20 +58,20 @@ def get_dhcp_server_config():
     config = [line.strip() for line in config]
     return [line.split(' ')[-1] for line in config]
 
-def set_hostname(hostname):
+def change_hostname(hostname):
     if not hostname:
         raise InvalidArgumentException
     args = ['hostnamectl', 'set-hostname', hostname]
     return run_subprocess(args=args)
 
-def set_mut(mtu, device):
+def change_mtu(mtu, device):
     if not mtu\
     or  not device:
         raise InvalidArgumentException
     args = ['ip', 'link', 'set', device, 'mtu', mtu]
     return run_subprocess(args=args)
 
-def set_dhcp_server(domain_name, begin_ip_range, end_ip_range, lease_time):
+def change_dhcp_server(domain_name, begin_ip_range, end_ip_range, lease_time):
     if not domain_name\
     or not begin_ip_range\
     or not end_ip_range\
@@ -82,10 +83,40 @@ def set_dhcp_server(domain_name, begin_ip_range, end_ip_range, lease_time):
     args = ['udhcp', '/etc/udhcp.conf']
     return run_subprocess(args=args)
 
-def set_ipv4(address, netmask, device):
+def change_ipv4(address, netmask, device):
     if not address\
     or not netmask\
     or not device:
         raise InvalidArgumentException
     args = ['ip', 'addr', 'add', address, netmask, 'dev', device]
     result = run_subprocess(args=args)
+
+@click.group()
+def cli():
+    click.echo('### GW-CLI ###')
+
+@cli.command()
+@click.option('--address', help='IPv4 address to assign to device')
+@click.option('--netmask', help='IPv4 netmask')
+@click.option('--device', help='Device to assign the address to')
+def set_ipv4(address, netmask, device):
+    change_ipv4(address, netmask, device)
+
+@cli.command()
+@click.option('--mtu', help='MTU to assign to device')
+@click.option('--device', help='Device to assign the MTU to')
+def set_mtu(mtu, device):
+    change_mtu(mtu, device)
+
+@cli.command()
+@click.option('--hostname', help='New hostname')
+def set_hostname(hostname):
+    change_hostname(hostname)
+
+@cli.command()
+@click.option('--domain-name', help='New domain name')
+@click.option('--begin-ip-range', help='Begin of IP range')
+@click.option('--end-ip-range', help='End of IP range')
+@click.option('--lease-time', help='Lease time as string')
+def set_dhcp_server(domain_name, begin_ip_range, end_ip_range, lease_time):
+    change_dhcp_server(domain_name, begin_ip_range, end_ip_range, lease_time)

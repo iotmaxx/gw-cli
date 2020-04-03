@@ -4,15 +4,15 @@
 # @Email: alittysw@gmail.com
 # @Create At: 2020-03-23 23:04:16
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-04-03 12:29:16
+# @Last Modified At: 2020-04-03 12:37:51
 # @Description: Setupfile to install gw-cli.
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name='gw-commandline',
     version='0.1',
-    packages=find_packages(),
+    py_modules=['gw_cli'],
     install_requires=[
         'Click'
     ],
