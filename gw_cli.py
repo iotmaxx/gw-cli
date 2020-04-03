@@ -4,11 +4,11 @@
 # @Email: alittysw@gmail.com
 # @Create At: 2020-03-21 13:42:22
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-04-03 11:27:00
+# @Last Modified At: 2020-04-03 11:39:21
 # @Description: Command Line Tool to configure local network and dhcp settings on linux based machines.
 
 import click
-import commands
+import gw_commands
 
 @click.group()
 def cli():
