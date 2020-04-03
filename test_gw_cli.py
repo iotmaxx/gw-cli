@@ -4,18 +4,17 @@
 # @Email: alittysw@gmail.com
 # @Create At: 2020-03-21 13:41:33
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-04-03 10:39:19
+# @Last Modified At: 2020-04-03 11:28:24
 # @Description: Test cases for command line tool gw_cli.
 
 from click.testing import CliRunner
+from commands import run_subprocess, InvalidArgumentException
 from gw_cli import (
-    run_subprocess,
     set_hostname,
     set_ipv4,
     set_mtu,
-    InvalidArgumentException,
     set_dhcp_server
-    )
+)
 
 import unittest
 
