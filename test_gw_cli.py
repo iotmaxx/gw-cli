@@ -4,7 +4,7 @@
 # @Email: alittysw@gmail.com
 # @Create At: 2020-03-21 13:41:33
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-03-29 20:14:46
+# @Last Modified At: 2020-04-03 10:39:19
 # @Description: Test cases for command line tool gw_cli.
 
 from click.testing import CliRunner
@@ -14,8 +14,7 @@ from gw_cli import (
     set_ipv4,
     set_mtu,
     InvalidArgumentException,
-    set_dhcp_server,
-    set_dhcp_client
+    set_dhcp_server
     )
 
 import unittest
@@ -39,7 +38,7 @@ class TestGwCli(unittest.TestCase):
             '--hostname',
             'new_hostname'
             ])
-        self.assertEqual(result.returncode, 0)
+        self.assertEqual(result.exit_code, 0)
 
     def test_set_hostname_failure_no_hostname(self):
         result = self.runner.invoke(set_hostname, args=[
@@ -65,7 +64,7 @@ class TestGwCli(unittest.TestCase):
             '--device',
             'etn0'
             ])
-        self.assertEqual(result.returncode, 0)
+        self.assertEqual(result.exit_code, 0)
 
     def test_set_ipv4_failure_no_address(self):
         result = self.runner.invoke(set_ipv4, args=[
@@ -75,7 +74,7 @@ class TestGwCli(unittest.TestCase):
             'etn0'
             ])
         self.assertNotEqual(result.exit_code, 0)
-        self.assertIsInstance(result.exception, SystemExit)
+        self.assertIsInstance(result.exception, InvalidArgumentException)
 
     def test_set_ipv4_failure_empty_address(self):
         result = self.runner.invoke(set_ipv4, args=[
@@ -142,7 +141,7 @@ class TestGwCli(unittest.TestCase):
             '--device',
             'etn0'
             ])
-        self.assertEqual(result.returncode, 0)
+        self.assertEqual(result.exit_code, 0)
 
     def test_set_mtu_failure_no_mtu(self):
         result = self.runner.invoke(set_mtu, args=[
@@ -184,26 +183,26 @@ class TestGwCli(unittest.TestCase):
 
     def test_set_dhcp_server_success(self):
         result = self.runner.invoke(set_dhcp_server, args=[
-            '--domainname',
+            '--domain-name',
             'local',
-            '--beginIpRange',
+            '--begin-ip-range',
             '127.0.0.1',
-            '--endIpRange',
+            '--end-ip-range',
             '127.0.0.10',
-            '--leaseTime',
+            '--lease-time',
             5000
             ])
         self.assertEqual(result.exit_code, 0)
 
     def test_set_dhcp_server_failure_no_domain(self):
         result = self.runner.invoke(set_dhcp_server, args=[
-            '--domainname',
+            '--domain-name',
             '',
-            '--beginIpRange',
+            '--begin-ip-range',
             '127.0.0.1',
-            '--endIpRange',
+            '--end-ip-range',
             '127.0.0.10',
-            '--leaseTime',
+            '--lease-time',
             5000
             ])
         self.assertNotEqual(result.exit_code, 0)
@@ -211,13 +210,13 @@ class TestGwCli(unittest.TestCase):
 
     def test_set_dhcp_server_failure_no_begin_ip_range(self):
         result = self.runner.invoke(set_dhcp_server, args=[
-            '--domainname',
+            '--domain-name',
             'local',
-            '--beginIpRange',
+            '--begin-ip-range',
             '',
-            '--endIpRange',
+            '--end-ip-range',
             '127.0.0.10',
-            '--leaseTime',
+            '--lease-time',
             5000
             ])
         self.assertNotEqual(result.exit_code, 0)
@@ -225,13 +224,13 @@ class TestGwCli(unittest.TestCase):
 
     def test_set_dhcp_server_failure_no_end_ip_range(self):
         result = self.runner.invoke(set_dhcp_server, args=[
-            '--domainname',
+            '--domain-name',
             'local',
-            '--beginIpRange',
+            '--begin-ip-range',
             '127.0.0.1',
-            '--endIpRange',
+            '--end-ip-range',
             '',
-            '--leaseTime',
+            '--lease-time',
             5000
             ])
         self.assertNotEqual(result.exit_code, 0)
@@ -239,13 +238,14 @@ class TestGwCli(unittest.TestCase):
 
     def test_set_dhcp_server_failure_no_lease_time(self):
         result = self.runner.invoke(set_dhcp_server, args=[
-            '--domainname',
+            '--domain-name',
             'local',
-            '--beginIpRange',
+            '--begin-ip-range',
             '127.0.0.1',
-            '--endIpRange',
+            '--end-ip-range',
             '127.0.0.10',
-            '--leaseTime',
+            '--lease-time',
+            ''
             ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, InvalidArgumentException)
