@@ -4,8 +4,10 @@
 # @Email: alittysw@gmail.com
 # @Create At: 2020-03-21 13:41:33
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-04-03 12:38:10
+# @Last Modified At: 2020-04-05 15:41:01
 # @Description: Test cases for command line tool gw_cli.
+import unittest
+import tempfile
 
 from click.testing import CliRunner
 from gw_cli import (
@@ -14,10 +16,10 @@ from gw_cli import (
     set_hostname,
     set_ipv4,
     set_mtu,
-    set_dhcp_server
+    set_dhcp_server,
+    process_yaml
 )
 
-import unittest
 
 class TestGwCli(unittest.TestCase):
     
@@ -249,6 +251,23 @@ class TestGwCli(unittest.TestCase):
             ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, InvalidArgumentException)
+
+    def test_process_yaml_success(self):
+        result = process_yaml('yaml_template.yml')
+        self.assertIsNotNone(result)
+        self.assertIsInstance(result, dict)
+
+    def test_process_yaml_failure_file_not_found(self):
+        self.assertRaises(InvalidArgumentException, process_yaml, 'invalid_file.yml')
+
+    def test_process_yaml_failure_invalid_yaml(self):
+        with open('yaml_template.yml', 'r') as original_yaml:
+            content = original_yaml.read()
+        content = content + 'some silly content'
+        temp_yaml = tempfile.NamedTemporaryFile()
+        temp_yaml.write(content.encode())
+        result = process_yaml(temp_yaml.name)
+        self.assertIsNone(result)
 
 if __name__ == '__main__':
     unittest.main()

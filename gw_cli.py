@@ -4,7 +4,7 @@
 # @Email: alittysw@gmail.com
 # @Create At: 2020-03-21 13:42:22
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-04-05 15:10:39
+# @Last Modified At: 2020-04-05 15:40:42
 # @Description: Command Line Tool to configure local network and dhcp settings on linux based machines.
 
 import click
