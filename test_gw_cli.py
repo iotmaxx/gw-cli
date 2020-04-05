@@ -4,7 +4,7 @@
 # @Email: alittysw@gmail.com
 # @Create At: 2020-03-21 13:41:33
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-04-05 15:41:01
+# @Last Modified At: 2020-04-05 18:33:28
 # @Description: Test cases for command line tool gw_cli.
 import unittest
 import tempfile
@@ -22,11 +22,11 @@ from gw_cli import (
 
 
 class TestGwCli(unittest.TestCase):
-    
+
     @classmethod
     def setUpClass(cls):
         cls.runner = CliRunner()
-    
+
     def test_run_subprocess_success(self):
         result = run_subprocess(args=['ls', '-la'])
         self.assertEqual(result.returncode, 0)
@@ -39,13 +39,13 @@ class TestGwCli(unittest.TestCase):
         result = self.runner.invoke(set_hostname, args=[
             '--hostname',
             'new_hostname'
-            ])
+        ])
         self.assertEqual(result.exit_code, 0)
 
     def test_set_hostname_failure_no_hostname(self):
         result = self.runner.invoke(set_hostname, args=[
             '--hostname'
-            ])
+        ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, SystemExit)
 
@@ -53,7 +53,7 @@ class TestGwCli(unittest.TestCase):
         result = self.runner.invoke(set_hostname, args=[
             '--hostname',
             ''
-            ])
+        ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, InvalidArgumentException)
 
@@ -65,7 +65,7 @@ class TestGwCli(unittest.TestCase):
             '24',
             '--device',
             'etn0'
-            ])
+        ])
         self.assertEqual(result.exit_code, 0)
 
     def test_set_ipv4_failure_no_address(self):
@@ -74,7 +74,7 @@ class TestGwCli(unittest.TestCase):
             '24',
             '--device',
             'etn0'
-            ])
+        ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, InvalidArgumentException)
 
@@ -86,7 +86,7 @@ class TestGwCli(unittest.TestCase):
             '24',
             '--device',
             'etn0'
-            ])
+        ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, InvalidArgumentException)
 
@@ -97,7 +97,7 @@ class TestGwCli(unittest.TestCase):
             '--netmask',
             '--device',
             'etn0'
-            ])
+        ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, SystemExit)
 
@@ -109,7 +109,7 @@ class TestGwCli(unittest.TestCase):
             '',
             '--device',
             'etn0'
-            ])
+        ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, InvalidArgumentException)
 
@@ -120,7 +120,7 @@ class TestGwCli(unittest.TestCase):
             '--netmask',
             '24',
             '--device'
-            ])
+        ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, SystemExit)
 
@@ -132,7 +132,7 @@ class TestGwCli(unittest.TestCase):
             '24',
             '--device',
             ''
-            ])
+        ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, InvalidArgumentException)
 
@@ -142,7 +142,7 @@ class TestGwCli(unittest.TestCase):
             '2200',
             '--device',
             'etn0'
-            ])
+        ])
         self.assertEqual(result.exit_code, 0)
 
     def test_set_mtu_failure_no_mtu(self):
@@ -150,7 +150,7 @@ class TestGwCli(unittest.TestCase):
             '--mtu',
             '--device',
             'etn0'
-            ])
+        ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, SystemExit)
 
@@ -160,7 +160,7 @@ class TestGwCli(unittest.TestCase):
             '',
             '--device',
             'etn0'
-            ])
+        ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, InvalidArgumentException)
 
@@ -169,7 +169,7 @@ class TestGwCli(unittest.TestCase):
             '--mtu',
             '2020',
             '--device'
-            ])
+        ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, SystemExit)
 
@@ -179,7 +179,7 @@ class TestGwCli(unittest.TestCase):
             '2020',
             '--device',
             ''
-            ])
+        ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, InvalidArgumentException)
 
@@ -193,7 +193,7 @@ class TestGwCli(unittest.TestCase):
             '127.0.0.10',
             '--lease-time',
             5000
-            ])
+        ])
         self.assertEqual(result.exit_code, 0)
 
     def test_set_dhcp_server_failure_no_domain(self):
@@ -206,7 +206,7 @@ class TestGwCli(unittest.TestCase):
             '127.0.0.10',
             '--lease-time',
             5000
-            ])
+        ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, InvalidArgumentException)
 
@@ -220,7 +220,7 @@ class TestGwCli(unittest.TestCase):
             '127.0.0.10',
             '--lease-time',
             5000
-            ])
+        ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, InvalidArgumentException)
 
@@ -234,7 +234,7 @@ class TestGwCli(unittest.TestCase):
             '',
             '--lease-time',
             5000
-            ])
+        ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, InvalidArgumentException)
 
@@ -248,7 +248,7 @@ class TestGwCli(unittest.TestCase):
             '127.0.0.10',
             '--lease-time',
             ''
-            ])
+        ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, InvalidArgumentException)
 
@@ -258,7 +258,8 @@ class TestGwCli(unittest.TestCase):
         self.assertIsInstance(result, dict)
 
     def test_process_yaml_failure_file_not_found(self):
-        self.assertRaises(InvalidArgumentException, process_yaml, 'invalid_file.yml')
+        self.assertRaises(InvalidArgumentException,
+                          process_yaml, 'invalid_file.yml')
 
     def test_process_yaml_failure_invalid_yaml(self):
         with open('yaml_template.yml', 'r') as original_yaml:
@@ -268,6 +269,7 @@ class TestGwCli(unittest.TestCase):
         temp_yaml.write(content.encode())
         result = process_yaml(temp_yaml.name)
         self.assertIsNone(result)
+
 
 if __name__ == '__main__':
     unittest.main()
