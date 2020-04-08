@@ -4,7 +4,7 @@
 # @Email: alittysw@gmail.com
 # @Create At: 2020-03-21 13:42:22
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-04-05 18:32:17
+# @Last Modified At: 2020-04-08 20:15:58
 # @Description: Command Line Tool to configure local network and dhcp settings on linux based machines.
 
 import click
@@ -87,7 +87,7 @@ def change_hostname(hostname):
     return run_subprocess(args=args)
 
 
-def change_mtu(mtu, device):
+def change_mtu(mtu, device='eth0'):
     logger.info(f'Setting new mtu {mtu} on {device}')
     if not mtu\
             or not device:
@@ -120,7 +120,7 @@ def change_dhcp_server(domain_name, begin_ip_range, end_ip_range, lease_time):
     return run_subprocess(args=args)
 
 
-def change_ipv4(address, netmask, device):
+def change_ipv4(address, netmask, device='eth0'):
     logger.info(
         f'Setting new network address {address}, {netmask} on {device}')
     if not address\
