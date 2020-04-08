@@ -1,14 +1,14 @@
 # Prerequisite
 
-virtual environment running python 3.7
-pip3 install virtualenv
+virtual environment running python 3.7\
+pip3 install virtualenv\
 virtualenv -p /usr/bin/python3.7 gw-cli
 
 # Installation
 
-source gw-cli/bin/activate
-git clone git@github.com:iotmaxx/gw-cli.git
-cd gw-cli
+source gw-cli/bin/activate\
+git clone git@github.com:iotmaxx/gw-cli.git\
+cd gw-cli\
 pip install -e .
 
 # Run
