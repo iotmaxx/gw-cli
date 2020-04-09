@@ -4,7 +4,7 @@
 # @Email: alittysw@gmail.com
 # @Create At: 2020-03-21 13:41:33
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-04-05 18:33:28
+# @Last Modified At: 2020-04-10 02:28:05
 # @Description: Test cases for command line tool gw_cli.
 import unittest
 import tempfile
@@ -64,7 +64,7 @@ class TestGwCli(unittest.TestCase):
             '--netmask',
             '24',
             '--device',
-            'etn0'
+            'eth0'
         ])
         self.assertEqual(result.exit_code, 0)
 
@@ -73,7 +73,7 @@ class TestGwCli(unittest.TestCase):
             '--netmask',
             '24',
             '--device',
-            'etn0'
+            'eth0'
         ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, InvalidArgumentException)
@@ -85,7 +85,7 @@ class TestGwCli(unittest.TestCase):
             '--netmask',
             '24',
             '--device',
-            'etn0'
+            'eth0'
         ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, InvalidArgumentException)
@@ -96,7 +96,7 @@ class TestGwCli(unittest.TestCase):
             '127.0.0.2',
             '--netmask',
             '--device',
-            'etn0'
+            'eth0'
         ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, SystemExit)
@@ -108,7 +108,7 @@ class TestGwCli(unittest.TestCase):
             '--netmask',
             '',
             '--device',
-            'etn0'
+            'eth0'
         ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, InvalidArgumentException)
@@ -141,7 +141,7 @@ class TestGwCli(unittest.TestCase):
             '--mtu',
             '2200',
             '--device',
-            'etn0'
+            'eth0'
         ])
         self.assertEqual(result.exit_code, 0)
 
@@ -149,7 +149,7 @@ class TestGwCli(unittest.TestCase):
         result = self.runner.invoke(set_mtu, args=[
             '--mtu',
             '--device',
-            'etn0'
+            'eth0'
         ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, SystemExit)
@@ -159,7 +159,7 @@ class TestGwCli(unittest.TestCase):
             '--mtu',
             '',
             '--device',
-            'etn0'
+            'eth0'
         ])
         self.assertNotEqual(result.exit_code, 0)
         self.assertIsInstance(result.exception, InvalidArgumentException)
