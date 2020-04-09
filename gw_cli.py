@@ -131,7 +131,7 @@ def change_ipv4(address, netmask, device='eth0'):
             'Insufficient arguments provided raising InvalidArgumentException')
         raise InvalidArgumentException
     args = ['ip', 'addr', 'add', address, netmask, 'dev', device]
-    result = run_subprocess(args=args)
+    return run_subprocess(args=args)
 
 
 def process_yaml(yml):
