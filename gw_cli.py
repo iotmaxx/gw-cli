@@ -4,7 +4,7 @@
 # @Email: alittysw@gmail.com
 # @Create At: 2020-03-21 13:42:22
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-04-10 02:33:55
+# @Last Modified At: 2020-04-10 02:37:09
 # @Description: Command Line Tool to configure local network and dhcp settings on linux based machines.
 
 import click
@@ -19,6 +19,7 @@ logging.basicConfig(
     level=logging.DEBUG
 )
 logger = logging.getLogger(__name__)
+
 
 class EmptyArgsException(Exception):
 
@@ -190,13 +191,13 @@ def load_from_yaml(yml):
     if not config:
         return
     local_network = config.get('localNetwork')
-    set_hostname(local_network.get('hostname'))
-    set_ipv4(
+    change_hostname(local_network.get('hostname'))
+    change_ipv4(
         local_network.get('ipAddress'),
         local_network.get('subnetMask'),
         local_network.get('device')
     )
-    set_mtu(
+    change_mtu(
         local_network.get('mtu'),
         local_network.get('device')
     )
