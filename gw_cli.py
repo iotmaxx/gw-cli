@@ -130,7 +130,8 @@ def change_ipv4(address, netmask, device='eth0'):
         logger.error(
             'Insufficient arguments provided raising InvalidArgumentException')
         raise InvalidArgumentException
-    args = ['ip', 'addr', 'add', address, netmask, 'dev', device]
+    new_address = f'{address}/{netmask}'
+    args = ['ip', 'addr', 'add', new_address, 'dev', device]
     return run_subprocess(args=args)
 
 
