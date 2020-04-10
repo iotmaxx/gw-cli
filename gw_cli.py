@@ -4,7 +4,7 @@
 # @Email: alittysw@gmail.com
 # @Create At: 2020-03-21 13:42:22
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-04-10 12:16:49
+# @Last Modified At: 2020-04-10 13:10:11
 # @Description: Command Line Tool to configure local network and dhcp settings on linux based machines.
 
 import click
@@ -12,6 +12,7 @@ import subprocess
 import yaml
 import os
 import logging
+import re
 
 logging.basicConfig(
     filename='/tmp/gw.log',
@@ -19,6 +20,8 @@ logging.basicConfig(
     level=logging.DEBUG
 )
 logger = logging.getLogger(__name__)
+
+IP_REX = 'inet [0-9]+.[0-9]+.[0-9]+.[0-9]+/[0-9]+'
 
 
 class EmptyArgsException(Exception):
@@ -37,6 +40,20 @@ class InvalidArgumentException(Exception):
 
     def __str__(self):
         return self.message
+
+
+def get_current_address(device='eth0'):
+    addr = subprocess.run(
+        ['ip', 'addr', 'show' device],
+        check=True,
+        capture_output=True
+    )
+    if addr.returncode != 0:
+        return None
+    addr = addr.stdout.decode()
+    ipv4 = re.search(IP_REX, add).group()
+    ipv4 = ipv4.split(' ')[-1]
+    return ipv4
 
 
 def run_subprocess(args=[]):
@@ -131,7 +148,10 @@ def change_ipv4(address, netmask, device='eth0'):
             'Insufficient arguments provided raising InvalidArgumentException')
         raise InvalidArgumentException
     new_address = f'{address}/{netmask}'
-    args = ['ip', 'addr', 'change', new_address, 'dev', device]
+    current_address = get_current_address(device=device)
+    if current_address is not None:
+        args = ['ip', 'addr', 'del', current_address, 'dev', device]
+    args = ['ip', 'addr', 'add', new_address, 'dev', device]
     return run_subprocess(args=args)
 
 
