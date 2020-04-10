@@ -4,7 +4,7 @@
 # @Email: alittysw@gmail.com
 # @Create At: 2020-03-21 13:42:22
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-04-10 02:37:09
+# @Last Modified At: 2020-04-10 12:16:49
 # @Description: Command Line Tool to configure local network and dhcp settings on linux based machines.
 
 import click
@@ -131,7 +131,7 @@ def change_ipv4(address, netmask, device='eth0'):
             'Insufficient arguments provided raising InvalidArgumentException')
         raise InvalidArgumentException
     new_address = f'{address}/{netmask}'
-    args = ['ip', 'addr', 'add', new_address, 'dev', device]
+    args = ['ip', 'addr', 'change', new_address, 'dev', device]
     return run_subprocess(args=args)
 
 
