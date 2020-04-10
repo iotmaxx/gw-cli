@@ -4,7 +4,7 @@
 # @Email: alittysw@gmail.com
 # @Create At: 2020-03-21 13:42:22
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-04-10 13:10:11
+# @Last Modified At: 2020-04-10 14:22:09
 # @Description: Command Line Tool to configure local network and dhcp settings on linux based machines.
 
 import click
@@ -44,7 +44,7 @@ class InvalidArgumentException(Exception):
 
 def get_current_address(device='eth0'):
     addr = subprocess.run(
-        ['ip', 'addr', 'show' device],
+        ['ip', 'addr', 'show', device],
         check=True,
         capture_output=True
     )
@@ -177,7 +177,7 @@ def cli():
 
 @cli.command()
 @click.option('--address', help='IPv4 address to assign to device')
-@click.option('--netmask', help='IPv4 netmask')
+@click.option('--netmask', help='IPv4 netmask supported formats: 99 (CIRD format) and 999.999.999.999 (long mask format)')
 @click.option('--device', default='eth0', help='Device to assign the address to')
 def set_ipv4(address, netmask, device):
     change_ipv4(address, netmask, device)
