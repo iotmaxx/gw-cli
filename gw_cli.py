@@ -4,7 +4,7 @@
 # @Email: alittysw@gmail.com
 # @Create At: 2020-03-21 13:42:22
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-04-13 12:02:33
+# @Last Modified At: 2020-04-13 13:51:59
 # @Description: Command Line Tool to configure local network and dhcp settings on linux based machines.
 
 import click
@@ -89,9 +89,9 @@ def make_dhcp_server_config(begin_ip_range, end_ip_range, lease_time, domain_nam
 
 
 def get_dhcp_server_config():
-    if not os.path.isfile('/etc/udhcp.conf'):
+    if not os.path.isfile('/etc/udhcpd.conf'):
         return []
-    with open('/etc/udhcp.conf', 'r') as udhcp_conf:
+    with open('/etc/udhcpd.conf', 'r') as udhcp_conf:
         config = udhcp_conf.readlines()
     config = [line.strip() for line in config]
     return [line.split(' ')[-1] for line in config]
@@ -134,9 +134,9 @@ def change_dhcp_server(domain_name, begin_ip_range, end_ip_range, lease_time):
         lease_time,
         domain_name
     )
-    with open('/etc/udhcp.conf', 'w') as udhcp_conf:
+    with open('/etc/udhcpd.conf', 'w') as udhcp_conf:
         udhcp_conf.write(dhcp_server_config)
-    args = ['udhcp', '/etc/udhcp.conf']
+    args = ['udhcp', '/etc/udhcpd.conf']
     return run_subprocess(args=args)
 
 
