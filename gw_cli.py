@@ -4,7 +4,7 @@
 # @Email: alittysw@gmail.com
 # @Create At: 2020-03-21 13:42:22
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-04-10 14:22:09
+# @Last Modified At: 2020-04-13 12:02:33
 # @Description: Command Line Tool to configure local network and dhcp settings on linux based machines.
 
 import click
@@ -13,6 +13,8 @@ import yaml
 import os
 import logging
 import re
+import textwrap
+
 
 logging.basicConfig(
     filename='/tmp/gw.log',
@@ -78,12 +80,12 @@ def run_subprocess(args=[]):
 
 
 def make_dhcp_server_config(begin_ip_range, end_ip_range, lease_time, domain_name):
-    return f"""
+    return textwrap.dedent(f"""\
     start {begin_ip_range}
     end {end_ip_range}
     min_lease {lease_time}
     option domain {domain_name}
-    """
+    """)
 
 
 def get_dhcp_server_config():
