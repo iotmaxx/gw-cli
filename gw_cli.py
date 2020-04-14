@@ -4,7 +4,7 @@
 # @Email: alittysw@gmail.com
 # @Create At: 2020-03-21 13:42:22
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-04-13 13:51:59
+# @Last Modified At: 2020-04-14 11:46:50
 # @Description: Command Line Tool to configure local network and dhcp settings on linux based machines.
 
 import click
@@ -45,17 +45,20 @@ class InvalidArgumentException(Exception):
 
 
 def get_current_address(device='eth0'):
-    addr = subprocess.run(
-        ['ip', 'addr', 'show', device],
-        check=True,
-        capture_output=True
-    )
-    if addr.returncode != 0:
+    try:
+        addr = subprocess.run(
+            ['ip', 'addr', 'show', device],
+            check=True,
+            capture_output=True
+        )
+        if addr.returncode != 0:
+            return None
+        addr = addr.stdout.decode()
+        ipv4 = re.search(IP_REX, addr).group()
+        ipv4 = ipv4.split(' ')[-1]
+        return ipv4
+    except Exception:
         return None
-    addr = addr.stdout.decode()
-    ipv4 = re.search(IP_REX, add).group()
-    ipv4 = ipv4.split(' ')[-1]
-    return ipv4
 
 
 def run_subprocess(args=[]):
@@ -153,6 +156,7 @@ def change_ipv4(address, netmask, device='eth0'):
     current_address = get_current_address(device=device)
     if current_address is not None:
         args = ['ip', 'addr', 'del', current_address, 'dev', device]
+        run_subprocess(args=args)
     args = ['ip', 'addr', 'add', new_address, 'dev', device]
     return run_subprocess(args=args)
 
