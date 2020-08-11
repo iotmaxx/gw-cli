@@ -4,7 +4,7 @@
 # @Email: alittysw@gmail.com
 # @Create At: 2020-03-21 13:42:22
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-08-06 16:45:58
+# @Last Modified At: 2020-08-11 15:34:01
 # @Description: Command Line Tool to configure local network and dhcp settings
 # on linux based machines.
 
@@ -15,6 +15,7 @@ import os
 import logging
 import re
 import textwrap
+import signal
 
 
 logging.basicConfig(
@@ -123,6 +124,22 @@ def change_mtu(mtu, device='eth0'):
     return run_subprocess(args=args)
 
 
+def stop_dhcp_server_if_running():
+    logger.info('Stopping udhcpd if running...')
+    try:
+        result = subprocess.run(
+            ['ps', '-A'],
+            check=True,
+            capture_output=True
+        )
+        for line in result.stdout.splitlines():
+            if 'udhcpd' in line.decode():
+                pid = int(line.split(None, 1)[0])
+                os.kill(pid, signal.SIGKILL)
+    except Exception as e:
+        logger.error(f'Error while killing udhcod: {e}')
+
+
 def change_dhcp_server(domain_name, begin_ip_range, end_ip_range, lease_time):
     logger.info(
         f'Setting new dhcp server config with {domain_name}, {begin_ip_range},\
@@ -140,6 +157,7 @@ def change_dhcp_server(domain_name, begin_ip_range, end_ip_range, lease_time):
         lease_time,
         domain_name
     )
+    stop_dhcp_server_if_running()
     with open('/etc/udhcpd.conf', 'w') as udhcp_conf:
         udhcp_conf.write(dhcp_server_config)
     args = ['udhcpd', '/etc/udhcpd.conf']
