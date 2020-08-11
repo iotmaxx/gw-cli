@@ -4,7 +4,7 @@
 # @Email: alittysw@gmail.com
 # @Create At: 2020-03-21 13:42:22
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-08-11 15:34:01
+# @Last Modified At: 2020-08-11 16:06:33
 # @Description: Command Line Tool to configure local network and dhcp settings
 # on linux based machines.
 
@@ -272,7 +272,7 @@ def load_from_yaml(yml):
     )
 
 
-@click.command()
+@cli.command()
 @click.option('--apn', default='internet', help='APN the modem is set to')
 @click.option('--name', default='mobile', help='Connection name')
 def setup_modem(apn, name):
