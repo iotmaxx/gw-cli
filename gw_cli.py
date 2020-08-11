@@ -4,7 +4,7 @@
 # @Email: alittysw@gmail.com
 # @Create At: 2020-03-21 13:42:22
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-08-11 16:06:33
+# @Last Modified At: 2020-08-11 16:23:30
 # @Description: Command Line Tool to configure local network and dhcp settings
 # on linux based machines.
 
@@ -199,8 +199,8 @@ def process_yaml(yml):
 
 def set_modem(con_name='mobile', operator_apn='internet'):
     logger.info('Setting up modem')
-    args = ['nmcli', 'c', 'add', 'type', 'gsm', 'ifname', '"*"',
-            'con-name', con_name, 'apn', f'"{operator_apn}"']
+    args = ['nmcli', 'c', 'add', 'type', 'gsm', 'ifname', '*',
+            'con-name', con_name, 'apn', operator_apn]
     setup_result = run_subprocess(args=args)
     if setup_result.returncode == 0:
         args = ['nmcli', 'c', 'up', con_name]
