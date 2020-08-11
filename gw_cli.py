@@ -4,8 +4,9 @@
 # @Email: alittysw@gmail.com
 # @Create At: 2020-03-21 13:42:22
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-08-06 15:15:08
-# @Description: Command Line Tool to configure local network and dhcp settings on linux based machines.
+# @Last Modified At: 2020-08-11 15:34:01
+# @Description: Command Line Tool to configure local network and dhcp settings
+# on linux based machines.
 
 import click
 import subprocess
@@ -14,6 +15,7 @@ import os
 import logging
 import re
 import textwrap
+import signal
 
 
 logging.basicConfig(
@@ -82,7 +84,8 @@ def run_subprocess(args=[]):
     return result
 
 
-def make_dhcp_server_config(begin_ip_range, end_ip_range, lease_time, domain_name):
+def make_dhcp_server_config(begin_ip_range, end_ip_range, lease_time,
+                            domain_name):
     return textwrap.dedent(f"""\
     start {begin_ip_range}
     end {end_ip_range}
@@ -121,9 +124,26 @@ def change_mtu(mtu, device='eth0'):
     return run_subprocess(args=args)
 
 
+def stop_dhcp_server_if_running():
+    logger.info('Stopping udhcpd if running...')
+    try:
+        result = subprocess.run(
+            ['ps', '-A'],
+            check=True,
+            capture_output=True
+        )
+        for line in result.stdout.splitlines():
+            if 'udhcpd' in line.decode():
+                pid = int(line.split(None, 1)[0])
+                os.kill(pid, signal.SIGKILL)
+    except Exception as e:
+        logger.error(f'Error while killing udhcod: {e}')
+
+
 def change_dhcp_server(domain_name, begin_ip_range, end_ip_range, lease_time):
     logger.info(
-        f'Setting new dhcp server config with {domain_name}, {begin_ip_range}, {end_ip_range}, {lease_time}')
+        f'Setting new dhcp server config with {domain_name}, {begin_ip_range},\
+        {end_ip_range}, {lease_time}')
     if not domain_name\
             or not begin_ip_range\
             or not end_ip_range\
@@ -137,6 +157,7 @@ def change_dhcp_server(domain_name, begin_ip_range, end_ip_range, lease_time):
         lease_time,
         domain_name
     )
+    stop_dhcp_server_if_running()
     with open('/etc/udhcpd.conf', 'w') as udhcp_conf:
         udhcp_conf.write(dhcp_server_config)
     args = ['udhcpd', '/etc/udhcpd.conf']
@@ -176,6 +197,19 @@ def process_yaml(yml):
         return None
 
 
+def set_modem(con_name='mobile', operator_apn='internet'):
+    logger.info('Setting up modem')
+    args = ['nmcli', 'c', 'add', 'type', 'gsm', 'ifname', '"*"',
+            'con-name', con_name, 'apn', f'"{operator_apn}"']
+    setup_result = run_subprocess(args=args)
+    if setup_result.returncode == 0:
+        args = ['nmcli', 'c', 'up', con_name]
+        return run_subprocess(args=args)
+    else:
+        logger.error('Error while setting up modem')
+        return setup_result
+
+
 @click.group()
 def cli():
     click.echo('### GW-CLI ###')
@@ -183,8 +217,9 @@ def cli():
 
 @cli.command()
 @click.option('--address', help='IPv4 address to assign to device')
-@click.option('--netmask', help='IPv4 netmask supported formats: 99 (CIRD format) and 999.999.999.999 (long mask format)')
-@click.option('--device', default='eth0', help='Device to assign the address to')
+@click.option('--netmask', help='IPv4 netmask supported formats: 99\
+    (CIRD format) and 999.999.999.999 (long mask format)')
+@click.option('--device', default='eth0', help='Device to assign the address')
 def set_ipv4(address, netmask, device):
     change_ipv4(address, netmask, device)
 
@@ -235,3 +270,10 @@ def load_from_yaml(yml):
         dhcp_server.get('endIpRange'),
         dhcp_server.get('leaseTime')
     )
+
+
+@click.command()
+@click.option('--apn', default='internet', help='APN the modem is set to')
+@click.option('--name', default='mobile', help='Connection name')
+def setup_modem(apn, name):
+    set_modem(con_name=name, operator_apn=apn)

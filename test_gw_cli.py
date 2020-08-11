@@ -4,7 +4,7 @@
 # @Email: alittysw@gmail.com
 # @Create At: 2020-03-21 13:41:33
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-04-10 02:28:05
+# @Last Modified At: 2020-08-06 16:47:15
 # @Description: Test cases for command line tool gw_cli.
 import unittest
 import tempfile
@@ -17,7 +17,8 @@ from gw_cli import (
     set_ipv4,
     set_mtu,
     set_dhcp_server,
-    process_yaml
+    process_yaml,
+    setup_modem
 )
 
 
@@ -269,6 +270,24 @@ class TestGwCli(unittest.TestCase):
         temp_yaml.write(content.encode())
         result = process_yaml(temp_yaml.name)
         self.assertIsNone(result)
+
+    def test_set_modem_success(self):
+        result = self.runner.invoke(setup_modem, args=[
+            '--apn',
+            'internet',
+            '--name',
+            'mobile'
+        ])
+        self.assertEqual(result.exit_code, 0)
+
+    def test_set_modem_failure_wrong_apn(self):
+        result = self.runner.invoke(setup_modem, args=[
+            '--apn',
+            'false_internet',
+            '--name',
+            'mobile'
+        ])
+        self.assertNotEqual(result.exit_code, 0)
 
 
 if __name__ == '__main__':
