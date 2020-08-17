@@ -4,7 +4,7 @@
 # @Email: alittysw@gmail.com
 # @Create At: 2020-03-21 13:42:22
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-08-11 16:23:30
+# @Last Modified At: 2020-08-17 15:34:09
 # @Description: Command Line Tool to configure local network and dhcp settings
 # on linux based machines.
 
@@ -197,10 +197,15 @@ def process_yaml(yml):
         return None
 
 
-def set_modem(con_name='mobile', operator_apn='internet'):
+def set_modem(con_name='mobile', operator_apn='internet', pin=None, user=None,
+              password=None):
     logger.info('Setting up modem')
     args = ['nmcli', 'c', 'add', 'type', 'gsm', 'ifname', '*',
             'con-name', con_name, 'apn', operator_apn]
+    if pin is not None:
+        args.extend(['pin', pin])
+    if user is not None and password is not None:
+        args.extend(['username', user, 'password', password])
     setup_result = run_subprocess(args=args)
     if setup_result.returncode == 0:
         args = ['nmcli', 'c', 'up', con_name]
@@ -275,5 +280,14 @@ def load_from_yaml(yml):
 @cli.command()
 @click.option('--apn', default='internet', help='APN the modem is set to')
 @click.option('--name', default='mobile', help='Connection name')
-def setup_modem(apn, name):
-    set_modem(con_name=name, operator_apn=apn)
+@click.option('--pin', default=None, help='SIMs PIN')
+@click.option('--user', default=None, help='Username')
+@click.option('--password', default=None, help='Password')
+def setup_modem(apn, name, pin, user, password):
+    set_modem(
+        con_name=name,
+        operator_apn=apn,
+        pin=pin,
+        user=user,
+        password=password
+    )
