@@ -4,7 +4,7 @@
 # @Email: alittysw@gmail.com
 # @Create At: 2020-03-21 13:42:22
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-08-17 15:34:09
+# @Last Modified At: 2020-09-24 12:04:14
 # @Description: Command Line Tool to configure local network and dhcp settings
 # on linux based machines.
 
@@ -202,9 +202,9 @@ def set_modem(con_name='mobile', operator_apn='internet', pin=None, user=None,
     logger.info('Setting up modem')
     args = ['nmcli', 'c', 'add', 'type', 'gsm', 'ifname', '*',
             'con-name', con_name, 'apn', operator_apn]
-    if pin is not None:
+    if pin:
         args.extend(['pin', pin])
-    if user is not None and password is not None:
+    if user and password:
         args.extend(['username', user, 'password', password])
     setup_result = run_subprocess(args=args)
     if setup_result.returncode == 0:
