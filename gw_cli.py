@@ -4,7 +4,7 @@
 # @Email: alittysw@gmail.com
 # @Create At: 2020-03-21 13:42:22
 # @Last Modified By: Andre Litty
-# @Last Modified At: 2020-09-24 12:04:14
+# @Last Modified At: 2020-11-09 02:20:45
 # @Description: Command Line Tool to configure local network and dhcp settings
 # on linux based machines.
 
@@ -274,6 +274,14 @@ def load_from_yaml(yml):
         dhcp_server.get('beginIpRange'),
         dhcp_server.get('endIpRange'),
         dhcp_server.get('leaseTime')
+    )
+    modem_config = config.get('modem')
+    set_modem(
+        con_name=modem_config.get('conName'),
+        operator_apn=modem_config.get('operatorApn'),
+        pin=modem_config.get('pin', None),
+        user=modem_config.get('user', None),
+        password=modem_config.get('password', None)
     )
 
 
