@@ -1,12 +1,18 @@
 description: Basic YAML file for development and example purpose
 localNetwork:
-    hostname: localhost
-    ipAddress: 127.0.0.1
-    subnetMask: 255.255.255.0
-    mtu: 2500
-    device: eth0
+  hostname: localhost
+  ipAddress: 127.0.0.1
+  subnetMask: 255.255.255.0
+  mtu: 2500
+  device: eth0
 dhcpServer:
-      domainName: dhcpServer
-      beginIpRange: 192.168.0.1
-      endIpRange: 192.168.0.254
-      leaseTime: 1d
+  domainName: dhcpServer
+  beginIpRange: 192.168.0.1
+  endIpRange: 192.168.0.254
+  leaseTime: 1d
+modem:
+  conName: mobile
+  operatorApn: internet
+  password: null
+  username: null
+  pin: null
