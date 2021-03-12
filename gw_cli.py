@@ -16,6 +16,8 @@ import logging
 import re
 import textwrap
 import signal
+import configparser
+from ipaddress import IPv4Network
 
 
 logging.basicConfig(
@@ -26,6 +28,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 IP_REX = 'inet [0-9]+.[0-9]+.[0-9]+.[0-9]+/[0-9]+'
+file_path_systemd_config = '/etc/systemd/network/10-eth0.network'
+file_path_unmanaged = '/etc/NetworkManager/conf.d/unmanaged.conf'
 
 
 class EmptyArgsException(Exception):
@@ -95,12 +99,18 @@ def make_dhcp_server_config(begin_ip_range, end_ip_range, lease_time,
 
 
 def get_dhcp_server_config():
-    if not os.path.isfile('/etc/udhcpd.conf'):
-        return []
-    with open('/etc/udhcpd.conf', 'r') as udhcp_conf:
-        config = udhcp_conf.readlines()
-    config = [line.strip() for line in config]
-    return [line.split(' ')[-1] for line in config]
+    config = configparser.ConfigParser()
+    config.optionxform = str
+    config.read(file_path_systemd_config)
+    
+    start = config['DHCPServer']['PoolOffset']
+    end = config['DHCPServer']['PoolSize']
+    lease_time = 7200
+    domain_name = "Gateway"
+
+    dhcp_config = [start, end, lease_time, domain_name]
+
+    return dhcp_config    
 
 
 def change_hostname(hostname):
@@ -151,17 +161,15 @@ def change_dhcp_server(domain_name, begin_ip_range, end_ip_range, lease_time):
         logger.error(
             'Insufficient arguments provided raising InvalidArgumentException')
         raise InvalidArgumentException
-    dhcp_server_config = make_dhcp_server_config(
-        begin_ip_range,
-        end_ip_range,
-        lease_time,
-        domain_name
-    )
-    stop_dhcp_server_if_running()
-    with open('/etc/udhcpd.conf', 'w') as udhcp_conf:
-        udhcp_conf.write(dhcp_server_config)
-    args = ['udhcpd', '/etc/udhcpd.conf']
-    return run_subprocess(args=args)
+
+
+    dhcp_dict = {'PoolOffset': begin_ip_range, 'PoolSize':end_ip_range}
+
+    change_hostvalues(dhcp_dict, 'DHCPServer')
+
+    #stop_dhcp_server_if_running()   
+    args = ['systemctl', 'restart', 'NetworkManager']
+    run_subprocess(args=args)
 
 
 def change_ipv4(address, netmask, device='eth0'):
@@ -173,13 +181,35 @@ def change_ipv4(address, netmask, device='eth0'):
         logger.error(
             'Insufficient arguments provided raising InvalidArgumentException')
         raise InvalidArgumentException
-    new_address = f'{address}/{netmask}'
+    address_digit = "0.0.0.0/{1}".format(address, netmask)
+    netmask_bits = IPv4Network(address_digit).prefixlen
+    
+
+    new_address = "{0}/{1}".format(address, netmask_bits)
+    #new_address = f'{address}/{netmask}'
     current_address = get_current_address(device=device)
-    if current_address is not None:
-        args = ['ip', 'addr', 'del', current_address, 'dev', device]
-        run_subprocess(args=args)
-    args = ['ip', 'addr', 'add', new_address, 'dev', device]
-    return run_subprocess(args=args)
+
+
+
+    ipv4_dict = {'Address':new_address}
+
+    change_hostvalues(ipv4_dict, 'Network')
+
+    change_unmanaged_state(True)
+
+    args = ['systemctl', 'restart', 'NetworkManager']
+    run_subprocess(args=args)
+
+    args = ['nmcli', 'con', 'mod', 'eth0', 'ipv4.address', new_address]
+    run_subprocess(args=args)
+
+    change_unmanaged_state(False)
+
+    args = ['systemctl', 'restart', 'NetworkManager']
+    run_subprocess(args=args)
+
+   
+
 
 
 def process_yaml(yml):
@@ -200,10 +230,11 @@ def process_yaml(yml):
 def set_modem(con_name='mobile', operator_apn='internet', pin=None, user=None,
               password=None):
     logger.info('Setting up modem')
+    if pin:
+        args_pin = ['mmcli', '-i', '0', '--pin', pin]
+        run_subprocess(args=args_pin)
     args = ['nmcli', 'c', 'add', 'type', 'gsm', 'ifname', '*',
             'con-name', con_name, 'apn', operator_apn]
-    if pin:
-        args.extend(['pin', pin])
     if user and password:
         args.extend(['username', user, 'password', password])
     setup_result = run_subprocess(args=args)
@@ -213,6 +244,42 @@ def set_modem(con_name='mobile', operator_apn='internet', pin=None, user=None,
     else:
         logger.error('Error while setting up modem')
         return setup_result
+
+
+def change_hostvalues(valueDict, section):
+    args = ['mount', '-o', 'remount,rw', '/']
+    run_subprocess(args=args)    
+
+    config = configparser.ConfigParser()
+    config.optionxform = str
+    config.read(file_path_systemd_config)
+    for key in valueDict:
+        config.set(section, key, valueDict[key]) 
+
+    cfgfile = open(file_path_systemd_config,'w')
+    config.write(cfgfile, space_around_delimiters=False)  
+    cfgfile.close()  
+    args = ['mount', '-o', 'remount,ro', '/']
+    run_subprocess(args=args)     
+
+
+def change_unmanaged_state(flag):
+    args = ['mount', '-o', 'remount,rw', '/']
+    run_subprocess(args=args)
+    config = configparser.ConfigParser()
+    config.optionxform = str
+    config.read(file_path_unmanaged)
+    if flag is True:    
+        config.set('keyfile', 'unmanaged-devices', 'None')
+    else:
+        config.set('keyfile', 'unmanaged-devices', 'interface-name:eth0')
+
+    cfgfile = open(file_path_unmanaged,'w')
+    config.write(cfgfile, space_around_delimiters=True)  
+    cfgfile.close()  
+    args = ['mount', '-o', 'remount,ro', '/']
+    run_subprocess(args=args)
+
 
 
 @click.group()
