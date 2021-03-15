@@ -16,6 +16,7 @@ import logging
 import re
 import textwrap
 import signal
+import time
 import configparser
 from ipaddress import IPv4Network
 
@@ -209,7 +210,52 @@ def change_ipv4(address, netmask, device='eth0'):
     run_subprocess(args=args)
 
    
+def config_handler(operator_apn='internet', pin=None, autoreconnect=False, user = None, password= None):
+    path = '/config/ModemConfig'
+    if not os.path.isfile(path):
+        config = configparser.ConfigParser()
+        config.optionxform = str
+        config['Modem'] = {
+            'Apn': operator_apn,
+            'Pin': pin,
+            'User': 'user',
+            'Password': 'password',
+            'Autoreconnect': autoreconnect
+        }
+        configfile = open(path, 'w')
+        config.write(configfile, space_around_delimiters=False)
+        configfile.close()
+    else:
+        config = configparser.ConfigParser()
+        config.optionxform = str
+        config.read(path)
+        config.set('Modem', 'Apn', operator_apn)
+        config.set('Modem', 'Pin', str(pin))
+        if user is None:
+            config.set('Modem', 'User', 'user')
+        if password is None:
+            config.set('Modem', 'Password', 'password')
+        
+        config.set('Modem', 'Autoreconnect', str(autoreconnect))
+        configfile = open(path, 'w')
+        config.write(configfile, space_around_delimiters=False)
+        configfile.close()
 
+def autostart():
+    time.sleep(30)
+    path = '/config/ModemConfig'
+    os.path.exists('/dev/ttyUSB0')
+    for x in range(3):
+        if os.path.exists('/dev/ttyUSB0'):
+            if os.path.isfile(path):
+                config = configparser.ConfigParser()
+                config.optionxform = str
+                config.read(path)
+                if config.getboolean('Modem','Autoreconnect'):
+                    set_modem(operator_apn=config['Modem']['Apn'], pin=config['Modem']['Pin'], user=config['Modem']['User'], password=config['Modem']['Password'])
+                    break
+        else:
+            time.sleep(3)
 
 
 def process_yaml(yml):
@@ -230,20 +276,18 @@ def process_yaml(yml):
 def set_modem(con_name='mobile', operator_apn='internet', pin=None, user=None,
               password=None):
     logger.info('Setting up modem')
+    
     if pin:
         args_pin = ['mmcli', '-i', '0', '--pin', pin]
         run_subprocess(args=args_pin)
+        time.sleep(2)
     args = ['nmcli', 'c', 'add', 'type', 'gsm', 'ifname', '*',
             'con-name', con_name, 'apn', operator_apn]
-    if user and password:
-        args.extend(['username', user, 'password', password])
+    config_handler(operator_apn=operator_apn, pin=pin, autoreconnect=True, user = None, password= None)
     setup_result = run_subprocess(args=args)
-    if setup_result.returncode == 0:
-        args = ['nmcli', 'c', 'up', con_name]
-        return run_subprocess(args=args)
-    else:
-        logger.error('Error while setting up modem')
-        return setup_result
+    args = ['nmcli', 'c', 'up', con_name]
+    return run_subprocess(args=args)
+
 
 
 def change_hostvalues(valueDict, section):
@@ -280,6 +324,8 @@ def change_unmanaged_state(flag):
     args = ['mount', '-o', 'remount,ro', '/']
     run_subprocess(args=args)
 
+if __name__ == "__main__":
+    autostart()
 
 
 @click.group()
