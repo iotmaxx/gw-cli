@@ -108,8 +108,9 @@ def get_dhcp_server_config():
     end = config['DHCPServer']['PoolSize']
     lease_time = 7200
     domain_name = "Gateway"
+    isDHCPServer = config['Network']['DHCPServer']
 
-    dhcp_config = [start, end, lease_time, domain_name]
+    dhcp_config = [start, end, lease_time, domain_name, isDHCPServer]
 
     return dhcp_config    
 
@@ -149,6 +150,20 @@ def stop_dhcp_server_if_running():
                 os.kill(pid, signal.SIGKILL)
     except Exception as e:
         logger.error(f'Error while killing udhcod: {e}')
+
+
+def swap_dhcp_state(flag=True):
+    if flag:
+        dhcp_dict = {'DHCP': 'false', 'DHCPServer':'true'}
+    else:
+        dhcp_dict = {'DHCP': 'true', 'DHCPServer':'false'}
+
+    change_hostvalues(dhcp_dict, 'Network')
+
+    #stop_dhcp_server_if_running()   
+    args = ['systemctl', 'restart', 'NetworkManager']
+    run_subprocess(args=args)
+
 
 
 def change_dhcp_server(domain_name, begin_ip_range, end_ip_range, lease_time):
